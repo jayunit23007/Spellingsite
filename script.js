@@ -144,6 +144,10 @@ let score = 0;
 let wrongWords = [];
 let answered = false;
 
+
+speechSynthesis.onvoiceschanged = () => {
+speechSynthesis.getVoices();
+};
 /*
  * Display one screen at a time.
  */
@@ -252,39 +256,71 @@ function loadWord() {
  * Read the current word aloud using the browser's
  * built-in speech synthesis feature.
  */
+// function speakWord() {
+//   if (!("speechSynthesis" in window)) {
+//     el("feedback").textContent =
+//       "Speech is not available in this browser. " +
+//       "Try Chrome, Edge, or Safari.";
+
+//     el("feedback").className = "feedback wrong";
+//     return;
+//   }
+
+//   window.speechSynthesis.cancel();
+
+//   const utterance = new SpeechSynthesisUtterance(
+//     quizWords[currentIndex]
+//   );
+
+//   utterance.lang = "en-GB";
+//   utterance.rate = 0.78;
+//   utterance.pitch = 1.05;
+
+//   utterance.onstart = () => {
+//     el("speak-button").classList.add("speaking");
+//   };
+
+//   utterance.onend = () => {
+//     el("speak-button").classList.remove("speaking");
+//   };
+
+//   utterance.onerror = () => {
+//     el("speak-button").classList.remove("speaking");
+//   };
+
+//   window.speechSynthesis.speak(utterance);
+// }
 function speakWord() {
-  if (!("speechSynthesis" in window)) {
-    el("feedback").textContent =
-      "Speech is not available in this browser. " +
-      "Try Chrome, Edge, or Safari.";
+  if (!("speechSynthesis" in window)) return;
 
-    el("feedback").className = "feedback wrong";
-    return;
-  }
+  speechSynthesis.cancel();
 
-  window.speechSynthesis.cancel();
+  const word = quizWords[currentIndex];
 
-  const utterance = new SpeechSynthesisUtterance(
-    quizWords[currentIndex]
-  );
+  //const utterance = new SpeechSynthesisUtterance(word);
 
-  utterance.lang = "en-GB";
-  utterance.rate = 0.78;
-  utterance.pitch = 1.05;
 
-  utterance.onstart = () => {
-    el("speak-button").classList.add("speaking");
-  };
+const utterance = new SpeechSynthesisUtterance(
+  `${word}. The word is ${word}. Please spell ${word}.`
+);
+  const voices = speechSynthesis.getVoices();
 
-  utterance.onend = () => {
-    el("speak-button").classList.remove("speaking");
-  };
+  const preferredVoice =
+    voices.find(v =>
+      v.lang === "en-GB" &&
+      v.name.includes("Google")
+    ) ||
+    voices.find(v =>
+      v.lang === "en-GB"
+    ) ||
+    voices[0];
 
-  utterance.onerror = () => {
-    el("speak-button").classList.remove("speaking");
-  };
+  utterance.voice = preferredVoice;
+  utterance.rate = 0.75;
+  utterance.pitch = 1;
+  utterance.volume = 1;
 
-  window.speechSynthesis.speak(utterance);
+  speechSynthesis.speak(utterance);
 }
 
 /*
